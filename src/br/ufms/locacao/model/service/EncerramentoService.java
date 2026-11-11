@@ -2,11 +2,9 @@ package br.ufms.locacao.model.service;
 
 import br.ufms.locacao.model.dao.*;
 import br.ufms.locacao.model.entity.*;
-import br.ufms.locacao.util.ConexaoBanco;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 public class EncerramentoService {
     private final LocacaoDAO locacaoDAO;
@@ -23,45 +21,29 @@ public class EncerramentoService {
         this.consumoDAO = consumoDAO; this.cobrancaDAO = cobrancaDAO; this.comprovanteDAO = comprovanteDAO; this.reservaDAO = reservaDAO;
     }
 
-    public Comprovante encerrar(int locacaoId, BigDecimal leituraFinal, boolean chavesDevolvidas, String condicaoSalao, String cpfFuncionario) throws Exception {
-        if (!chavesDevolvidas) throw new IllegalArgumentException("Confirme a devolução das chaves.");
-        if (condicaoSalao == null || condicaoSalao.isBlank()) throw new IllegalArgumentException("Informe as condições do salão.");
-        if (leituraFinal == null || leituraFinal.signum() < 0) throw new IllegalArgumentException("A leitura final deve ser igual ou maior que zero.");
-
+    public Comprovante encerrarLocacao(int locacaoId, boolean chavesDevolvidas, String condicaoSalao, BigDecimal leituraFinal, String cpfFuncionario) throws Exception {
         try (Connection conexao = ConexaoBanco.abrir()) {
             conexao.setAutoCommit(false);
             try {
                 Locacao locacao = locacaoDAO.buscarEmAndamento(conexao, locacaoId);
                 if (locacao == null) throw new IllegalArgumentException("A locação selecionada não está em andamento.");
+                locacao.setLeituraInicial(leituraDAO.buscarPorTipo(conexao, locacaoId, TipoLeitura.INICIAL));
 
-                BigDecimal leituraInicial = leituraDAO.buscarInicial(conexao, locacaoId);
-                int leituraInicialId = leituraDAO.buscarIdInicial(conexao, locacaoId);
-                if (leituraInicial == null || leituraInicialId == 0) throw new IllegalStateException("A leitura inicial não foi encontrada.");
-                if (leituraFinal.compareTo(leituraInicial) < 0) throw new IllegalArgumentException("A leitura final não pode ser menor que a leitura inicial.");
+                TarifaDeEnergia tarifa = tarifaDAO.buscarTarifaVigente(conexao, LocalDate.now());
+                ConsumoDeEnergia consumo = locacao.encerrar(chavesDevolvidas, condicaoSalao, leituraFinal, tarifa, cpfFuncionario);
 
-                TarifaDeEnergia tarifa = tarifaDAO.buscarVigente(conexao, LocalDate.now());
-                if (tarifa == null) throw new IllegalStateException("Não existe tarifa de energia vigente para a data de hoje.");
-
-                LocalDateTime agora = LocalDateTime.now();
-                int leituraFinalId = leituraDAO.inserir(conexao, locacaoId, leituraFinal, agora, TipoLeitura.FINAL, cpfFuncionario);
-                ConsumoDeEnergia consumo = ConsumoDeEnergia.calcular(locacaoId, leituraInicial, leituraFinal, tarifa);
-                BigDecimal consumoKwh = consumo.getConsumoKwh();
-                BigDecimal valorTotal = consumo.getValorTotal();
-
-                consumoDAO.inserir(conexao, locacaoId, leituraInicialId, leituraFinalId, tarifa.getId(), consumoKwh, valorTotal);
-                cobrancaDAO.inserir(conexao, locacaoId, locacao.getReserva().getMorador().getId(), consumoKwh, tarifa.getValorPorKwh(), valorTotal);
-                locacaoDAO.encerrar(conexao, locacaoId, agora, condicaoSalao.trim());
+                LeituraDeEnergia leituraFinalRegistrada = consumo.getLeituraFinal();
+                leituraFinalRegistrada.setId(leituraDAO.inserir(conexao, leituraFinalRegistrada));
+                consumoDAO.inserir(conexao, consumo);
+                cobrancaDAO.inserir(conexao, locacaoId, locacao.getReserva().getMorador().getId(),
+                        consumo.getConsumoKwh(), tarifa.getValorKwh(), consumo.getValorTotal());
+                locacaoDAO.encerrar(conexao, locacaoId, locacao.getDataFimReal(), locacao.getCondicaoSalao());
                 reservaDAO.atualizarStatus(conexao, locacao.getReserva().getId(), StatusReserva.ENCERRADA);
 
-                Comprovante comprovante = new Comprovante(0, locacaoId, locacao.getReserva().getMorador().getNome(),
-                        locacao.getReserva().getMorador().getUnidade(), locacao.getReserva().getSalao().getNome(),
-                        locacao.getDataInicioReal(), agora, leituraInicial, leituraFinal,
-                        consumoKwh, tarifa.getValorPorKwh(), valorTotal, agora);
-                int comprovanteId = comprovanteDAO.inserir(conexao, comprovante);
+                Comprovante comprovante = consumo.gerarComprovante(locacao);
+                comprovante.setId(comprovanteDAO.inserir(conexao, comprovante));
                 conexao.commit();
-                return new Comprovante(comprovanteId, locacaoId, comprovante.getMorador(), comprovante.getUnidade(),
-                        comprovante.getSalao(), comprovante.getInicio(), comprovante.getFim(), leituraInicial, leituraFinal,
-                        consumoKwh, tarifa.getValorPorKwh(), valorTotal, agora);
+                return comprovante;
             } catch (Exception e) { conexao.rollback(); throw e; }
         }
     }

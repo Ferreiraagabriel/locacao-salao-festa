@@ -56,5 +56,9 @@ public class ReservaView extends JPanel {
         modelo.setRowCount(0);
         for (Reserva r : reservas) modelo.addRow(new Object[]{r.getId(), r.getMorador().getNome(), r.getMorador().getUnidade(), r.getSalao().getNome(), DataHoraUtil.formatar(r.getDataInicio()), DataHoraUtil.formatar(r.getDataFim()), r.getStatus()});
     }
+    public boolean confirmarCancelamento(int reservaId) {
+        int resposta = JOptionPane.showConfirmDialog(this, "Deseja cancelar a reserva nº " + reservaId + "?", "Confirmar cancelamento", JOptionPane.YES_NO_OPTION);
+        return resposta == JOptionPane.YES_OPTION;
+    }
     public void mostrarMensagem(String texto, boolean erro) { mensagem.setForeground(erro ? new Color(170,45,45) : new Color(35,110,70)); mensagem.setText(texto); }
 }

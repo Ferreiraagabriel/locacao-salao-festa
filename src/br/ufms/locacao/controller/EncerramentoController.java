@@ -32,7 +32,7 @@ public class EncerramentoController {
             int locacaoId = view.getLocacaoSelecionada();
             if (locacaoId < 0) throw new IllegalArgumentException("Selecione uma locação em andamento.");
             BigDecimal leitura = new BigDecimal(view.getLeituraFinal().replace(',', '.'));
-            Comprovante comprovante = service.encerrar(locacaoId, leitura, view.isChavesDevolvidas(), view.getCondicaoSalao(), cpfFuncionario);
+            Comprovante comprovante = service.encerrarLocacao(locacaoId, view.isChavesDevolvidas(), view.getCondicaoSalao(), leitura, cpfFuncionario);
             view.limparFormulario(); view.mostrarMensagem("Locação encerrada. Cobrança pendente e comprovante gerados.", false);
             atualizarOutrasTelas.run();
             new ComprovanteDialog(janelaPrincipal, comprovante).setVisible(true);

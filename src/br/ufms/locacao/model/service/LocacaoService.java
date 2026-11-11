@@ -6,7 +6,7 @@ import br.ufms.locacao.model.dao.ReservaDAO;
 import br.ufms.locacao.model.entity.Reserva;
 import br.ufms.locacao.model.entity.StatusReserva;
 import br.ufms.locacao.model.entity.TipoLeitura;
-import br.ufms.locacao.util.ConexaoBanco;
+import br.ufms.locacao.model.dao.ConexaoBanco;
 import java.math.BigDecimal;
 import java.sql.Connection;
 import java.time.LocalDateTime;
@@ -30,6 +30,12 @@ public class LocacaoService {
                 if (reserva == null) throw new IllegalArgumentException("Reserva não encontrada.");
                 if (reserva.getStatus() != StatusReserva.RESERVADA) throw new IllegalArgumentException("A reserva não está disponível para início.");
                 LocalDateTime agora = LocalDateTime.now();
+                if (agora.toLocalDate().isBefore(reserva.getDataInicio().toLocalDate())) {
+                    throw new IllegalArgumentException("A locação só pode ser iniciada a partir do dia da reserva.");
+                }
+                if (agora.isAfter(reserva.getDataFim())) {
+                    throw new IllegalArgumentException("O período desta reserva já terminou. Cancele a reserva ou registre uma nova.");
+                }
                 int locacaoId = locacaoDAO.inserir(conexao, reservaId, agora);
                 leituraDAO.inserir(conexao, locacaoId, leituraInicial, agora, TipoLeitura.INICIAL, cpfFuncionario);
                 reservaDAO.atualizarStatus(conexao, reservaId, StatusReserva.INICIADA);

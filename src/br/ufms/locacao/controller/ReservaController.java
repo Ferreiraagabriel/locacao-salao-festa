@@ -8,7 +8,6 @@ import br.ufms.locacao.model.entity.SalaoDeFestas;
 import br.ufms.locacao.model.service.ReservaService;
 import br.ufms.locacao.util.DataHoraUtil;
 import br.ufms.locacao.view.ReservaView;
-import javax.swing.JOptionPane;
 import java.util.List;
 
 public class ReservaController {
@@ -54,8 +53,7 @@ public class ReservaController {
         try {
             int id = view.getReservaSelecionada();
             if (id < 0) throw new IllegalArgumentException("Selecione uma reserva na tabela.");
-            int resposta = JOptionPane.showConfirmDialog(view, "Deseja cancelar a reserva nº " + id + "?", "Confirmar cancelamento", JOptionPane.YES_NO_OPTION);
-            if (resposta != JOptionPane.YES_OPTION) return;
+            if (!view.confirmarCancelamento(id)) return;
             service.cancelar(id);
             view.mostrarMensagem("Reserva cancelada.", false);
             atualizar(); atualizarOutrasTelas.run();

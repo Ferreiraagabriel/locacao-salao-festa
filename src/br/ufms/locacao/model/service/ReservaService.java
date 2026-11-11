@@ -3,7 +3,7 @@ package br.ufms.locacao.model.service;
 import br.ufms.locacao.model.dao.ReservaDAO;
 import br.ufms.locacao.model.entity.Reserva;
 import br.ufms.locacao.model.entity.StatusReserva;
-import br.ufms.locacao.util.ConexaoBanco;
+import br.ufms.locacao.model.dao.ConexaoBanco;
 import java.sql.Connection;
 import java.time.LocalDateTime;
 
@@ -18,6 +18,7 @@ public class ReservaService {
     public int reservar(int moradorId, int salaoId, LocalDateTime inicio, LocalDateTime fim, String cpfFuncionario) throws Exception {
         disponibilidadeService.validarPeriodo(inicio, fim);
         if (moradorId <= 0 || salaoId <= 0) throw new IllegalArgumentException("Selecione o morador e o salão.");
+        if (inicio.isBefore(LocalDateTime.now())) throw new IllegalArgumentException("Não é possível registrar uma reserva com início no passado.");
         try (Connection conexao = ConexaoBanco.abrir()) {
             conexao.setAutoCommit(false);
             try {

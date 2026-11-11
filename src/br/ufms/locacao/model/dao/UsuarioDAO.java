@@ -3,7 +3,6 @@ package br.ufms.locacao.model.dao;
 import br.ufms.locacao.model.entity.Funcionario;
 import br.ufms.locacao.model.entity.Usuario;
 import br.ufms.locacao.model.entity.PerfilUsuario;
-import br.ufms.locacao.util.ConexaoBanco;
 import br.ufms.locacao.util.SenhaUtil;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
