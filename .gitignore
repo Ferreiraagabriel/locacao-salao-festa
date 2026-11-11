@@ -1,0 +1,6 @@
+/out/
+/target/
+*.db
+*.sqlite
+*.sqlite3
+*.class
