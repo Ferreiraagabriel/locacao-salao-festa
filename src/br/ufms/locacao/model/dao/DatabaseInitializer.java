@@ -1,6 +1,5 @@
 package br.ufms.locacao.model.dao;
 
-import br.ufms.locacao.util.ConexaoBanco;
 import br.ufms.locacao.util.SenhaUtil;
 
 import java.sql.Connection;

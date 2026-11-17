@@ -25,6 +25,7 @@ public class Comprovante {
     }
 
     public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
     public int getLocacaoId() { return locacaoId; }
     public String getMorador() { return morador; }
     public String getUnidade() { return unidade; }

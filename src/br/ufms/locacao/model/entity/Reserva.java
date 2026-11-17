@@ -30,5 +30,7 @@ public class Reserva {
     public void setSalao(SalaoDeFestas salao) { this.salao = salao; }
     public void setDataInicio(LocalDateTime dataInicio) { this.dataInicio = dataInicio; }
     public void setDataFim(LocalDateTime dataFim) { this.dataFim = dataFim; }
-    public boolean podeCancelar() { return status == StatusReserva.RESERVADA; }
+    public boolean podeCancelar(LocalDateTime agora) {
+        return status == StatusReserva.RESERVADA && agora != null && dataInicio != null && agora.isBefore(dataInicio);
+    }
 }

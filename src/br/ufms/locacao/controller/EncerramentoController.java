@@ -6,7 +6,6 @@ import br.ufms.locacao.model.service.EncerramentoService;
 import br.ufms.locacao.view.ComprovanteDialog;
 import br.ufms.locacao.view.EncerramentoView;
 import javax.swing.JFrame;
-import java.math.BigDecimal;
 
 public class EncerramentoController {
     private final EncerramentoView view;
@@ -31,12 +30,11 @@ public class EncerramentoController {
         try {
             int locacaoId = view.getLocacaoSelecionada();
             if (locacaoId < 0) throw new IllegalArgumentException("Selecione uma locação em andamento.");
-            BigDecimal leitura = new BigDecimal(view.getLeituraFinal().replace(',', '.'));
-            Comprovante comprovante = service.encerrar(locacaoId, leitura, view.isChavesDevolvidas(), view.getCondicaoSalao(), cpfFuncionario);
-            view.limparFormulario(); view.mostrarMensagem("Locação encerrada. Cobrança pendente e comprovante gerados.", false);
+            Comprovante comprovante = service.encerrarLocacao(locacaoId, view.isChavesDevolvidas(), view.getCondicaoSalao(), view.getLeituraFinal(), cpfFuncionario);
+            view.limparFormulario();
+            view.mostrarMensagem("Locação encerrada. Cobrança pendente e comprovante gerados.", false);
             atualizarOutrasTelas.run();
             new ComprovanteDialog(janelaPrincipal, comprovante).setVisible(true);
-        } catch (NumberFormatException e) { view.mostrarMensagem("Informe uma leitura final numérica. Use ponto ou vírgula para os decimais.", true); }
-        catch (Exception e) { view.mostrarMensagem(e.getMessage(), true); }
+        } catch (Exception e) { view.mostrarMensagem(e.getMessage(), true); }
     }
 }

@@ -1,5 +1,6 @@
 package br.ufms.locacao.model.dao;
 
+import br.ufms.locacao.model.entity.LeituraDeEnergia;
 import br.ufms.locacao.model.entity.TipoLeitura;
 import java.math.BigDecimal;
 import java.sql.Connection;
@@ -19,19 +20,21 @@ public class LeituraDAO {
         throw new java.sql.SQLException("Não foi possível salvar a leitura.");
     }
 
-    public int buscarIdInicial(Connection conexao, int locacaoId) throws Exception {
-        String sql = "SELECT id FROM leituras WHERE locacao_id = ? AND tipo = 'INICIAL'";
-        try (PreparedStatement comando = conexao.prepareStatement(sql)) {
-            comando.setInt(1, locacaoId);
-            try (ResultSet r = comando.executeQuery()) { return r.next() ? r.getInt("id") : 0; }
-        }
+    public int inserir(Connection conexao, LeituraDeEnergia leitura) throws Exception {
+        return inserir(conexao, leitura.getLocacaoId(), leitura.getValorLeitura(), leitura.getDataHora(),
+                leitura.getTipo(), leitura.getFuncionarioCpf());
     }
 
-    public BigDecimal buscarInicial(Connection conexao, int locacaoId) throws Exception {
-        String sql = "SELECT valor_kwh FROM leituras WHERE locacao_id = ? AND tipo = 'INICIAL'";
+    public LeituraDeEnergia buscarPorTipo(Connection conexao, int locacaoId, TipoLeitura tipo) throws Exception {
+        String sql = "SELECT id, locacao_id, valor_kwh, data_hora, tipo, funcionario_cpf FROM leituras WHERE locacao_id = ? AND tipo = ?";
         try (PreparedStatement comando = conexao.prepareStatement(sql)) {
-            comando.setInt(1, locacaoId);
-            try (ResultSet r = comando.executeQuery()) { return r.next() ? r.getBigDecimal("valor_kwh") : null; }
+            comando.setInt(1, locacaoId); comando.setString(2, tipo.name());
+            try (ResultSet r = comando.executeQuery()) {
+                if (!r.next()) return null;
+                return new LeituraDeEnergia(r.getInt("id"), r.getInt("locacao_id"), r.getBigDecimal("valor_kwh"),
+                        LocalDateTime.parse(r.getString("data_hora")), TipoLeitura.valueOf(r.getString("tipo")),
+                        r.getString("funcionario_cpf"));
+            }
         }
     }
 }

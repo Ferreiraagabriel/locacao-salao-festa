@@ -14,7 +14,7 @@ public class TarifaDeEnergia {
     }
 
     public int getId() { return id; }
-    public BigDecimal getValorPorKwh() { return valorPorKwh; }
+    public BigDecimal getValorKwh() { return valorPorKwh; }
     public LocalDate getInicioVigencia() { return inicioVigencia; }
     public LocalDate getFimVigencia() { return fimVigencia; }
     public void setValorPorKwh(BigDecimal valorPorKwh) { this.valorPorKwh = valorPorKwh; }

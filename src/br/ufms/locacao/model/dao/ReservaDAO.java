@@ -1,7 +1,6 @@
 package br.ufms.locacao.model.dao;
 
 import br.ufms.locacao.model.entity.*;
-import br.ufms.locacao.util.ConexaoBanco;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.util.ArrayList;

@@ -1,7 +1,6 @@
 package br.ufms.locacao.model.dao;
 
 import br.ufms.locacao.model.entity.SalaoDeFestas;
-import br.ufms.locacao.util.ConexaoBanco;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.Statement;

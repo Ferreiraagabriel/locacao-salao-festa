@@ -18,7 +18,8 @@ public class LeituraDeEnergia {
 
     public int getId() { return id; }
     public int getLocacaoId() { return locacaoId; }
-    public BigDecimal getValorKwh() { return valorKwh; }
+    public BigDecimal getValorLeitura() { return valorKwh; }
+    public void setId(int id) { this.id = id; }
     public LocalDateTime getDataHora() { return dataHora; }
     public TipoLeitura getTipo() { return tipo; }
     public String getFuncionarioCpf() { return funcionarioCpf; }

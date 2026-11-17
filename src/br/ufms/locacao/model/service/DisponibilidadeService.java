@@ -3,7 +3,7 @@ package br.ufms.locacao.model.service;
 import br.ufms.locacao.model.dao.ReservaDAO;
 import br.ufms.locacao.model.dao.SalaoDAO;
 import br.ufms.locacao.model.entity.SalaoDeFestas;
-import br.ufms.locacao.util.ConexaoBanco;
+import br.ufms.locacao.model.dao.ConexaoBanco;
 import java.sql.Connection;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
